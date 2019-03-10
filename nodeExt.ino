@@ -25,47 +25,23 @@ Relay waterWestRelay(waterWestRelayName, 5);
 Relay waterSouthRelay(waterSouthRelayName, 4);
 Contact tempNotUsed(tempNotUsedName, 2);
 
-static uint32_t loopNb = 0;
+uint32_t previousTime_Contact = 0;
+uint32_t previousTime_Temp = 0;
+uint32_t currentTime = 0;
 
-void ping_cmdGet(int arg_cnt, char **args) {
-  cnc_print_cmdGet_u32(pingName, loopNb);
-}
-void waterMainRelay_cmdGet(int arg_cnt, char **args) {
-  waterMainRelay.cmdGet(arg_cnt, args);
-}
-void waterMainRelay_cmdSet(int arg_cnt, char **args) {
-  waterMainRelay.cmdSet(arg_cnt, args);
-}
-void waterGardenRelay_cmdGet(int arg_cnt, char **args) {
-  waterGardenRelay.cmdGet(arg_cnt, args);
-}
-void waterGardenRelay_cmdSet(int arg_cnt, char **args) {
-  waterGardenRelay.cmdSet(arg_cnt, args);
-}
-void waterSideRelay_cmdGet(int arg_cnt, char **args) {
-  waterSideRelay.cmdGet(arg_cnt, args);
-}
-void waterSideRelay_cmdSet(int arg_cnt, char **args) {
-  waterSideRelay.cmdSet(arg_cnt, args);
-}
-void waterEastRelay_cmdGet(int arg_cnt, char **args) {
-  waterEastRelay.cmdGet(arg_cnt, args);
-}
-void waterEastRelay_cmdSet(int arg_cnt, char **args) {
-  waterEastRelay.cmdSet(arg_cnt, args);
-}
-void waterWestRelay_cmdGet(int arg_cnt, char **args) {
-  waterWestRelay.cmdGet(arg_cnt, args);
-}
-void waterWestRelay_cmdSet(int arg_cnt, char **args) {
-  waterWestRelay.cmdSet(arg_cnt, args);
-}
-void waterSouthRelay_cmdGet(int arg_cnt, char **args) {
-  waterSouthRelay.cmdGet(arg_cnt, args);
-}
-void waterSouthRelay_cmdSet(int arg_cnt, char **args) {
-  waterSouthRelay.cmdSet(arg_cnt, args);
-}
+void ping_cmdGet(int arg_cnt, char **args) { cnc_print_cmdGet_u32(pingName, currentTime); }
+void waterMainRelay_cmdGet(int arg_cnt, char **args) { waterMainRelay.cmdGet(arg_cnt, args); }
+void waterMainRelay_cmdSet(int arg_cnt, char **args) { waterMainRelay.cmdSet(arg_cnt, args); }
+void waterGardenRelay_cmdGet(int arg_cnt, char **args) { waterGardenRelay.cmdGet(arg_cnt, args); }
+void waterGardenRelay_cmdSet(int arg_cnt, char **args) { waterGardenRelay.cmdSet(arg_cnt, args); }
+void waterSideRelay_cmdGet(int arg_cnt, char **args) { waterSideRelay.cmdGet(arg_cnt, args); }
+void waterSideRelay_cmdSet(int arg_cnt, char **args) { waterSideRelay.cmdSet(arg_cnt, args); }
+void waterEastRelay_cmdGet(int arg_cnt, char **args) { waterEastRelay.cmdGet(arg_cnt, args); }
+void waterEastRelay_cmdSet(int arg_cnt, char **args) { waterEastRelay.cmdSet(arg_cnt, args); }
+void waterWestRelay_cmdGet(int arg_cnt, char **args) { waterWestRelay.cmdGet(arg_cnt, args); }
+void waterWestRelay_cmdSet(int arg_cnt, char **args) { waterWestRelay.cmdSet(arg_cnt, args); }
+void waterSouthRelay_cmdGet(int arg_cnt, char **args) { waterSouthRelay.cmdGet(arg_cnt, args); }
+void waterSouthRelay_cmdSet(int arg_cnt, char **args) { waterSouthRelay.cmdSet(arg_cnt, args); }
 
 void setup() {
   Serial.begin(115200);
@@ -87,21 +63,19 @@ void setup() {
   cnc_cmdSet_Add(waterWestRelayName, waterWestRelay_cmdSet);
   cnc_cmdGet_Add(waterSouthRelayName, waterSouthRelay_cmdGet);
   cnc_cmdSet_Add(waterSouthRelayName, waterSouthRelay_cmdSet);
+  previousTime_Contact = millis();
+  previousTime_Temp = millis();
 }
 
 
 void loop() {
   delay(1);
-  waterMainRelay.run(false);
-  waterGardenRelay.run(false);
-  waterSideRelay.run(false);
-  waterEastRelay.run(false);
-  waterWestRelay.run(false);
-  waterSouthRelay.run(false);
+  waterMainRelay.run(false); cncPoll();
+  waterGardenRelay.run(false); cncPoll();
+  waterSideRelay.run(false); cncPoll();
+  waterEastRelay.run(false); cncPoll();
+  waterWestRelay.run(false); cncPoll();
+  waterSouthRelay.run(false); cncPoll();
+  currentTime = millis(); cncPoll();
   cncPoll();
-  loopNb++;
-  if (1000000000 <= loopNb) {
-    loopNb = 0;
-  }
 }
-
