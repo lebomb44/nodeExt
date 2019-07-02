@@ -1,10 +1,12 @@
 #include <Relay.h>
 #include <Contact.h>
 #include <CnC.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 const char nodeName[] PROGMEM = "ext";
 const char sepName[] PROGMEM = " ";
-const char hkName[] PROGMEM = "hk";
+const char hkName[] PROGMEM = "val";
 const char cmdGetName[] PROGMEM = "get";
 const char cmdSetName[] PROGMEM = "set";
 
@@ -15,19 +17,30 @@ const char waterSideRelayName[] PROGMEM = "waterSideRelay";
 const char waterEastRelayName[] PROGMEM = "waterEastRelay";
 const char waterWestRelayName[] PROGMEM = "waterWestRelay";
 const char waterSouthRelayName[] PROGMEM = "waterSouthRelay";
-const char tempNotUsedName[] PROGMEM = "tempNotUsed";
+const char tempSensorsName[] PROGMEM = "tempSensors";
+const char windSpeedName[] PROGMEM = "windSpeed";
+const char rainFlowName[] PROGMEM = "rainFlow";
 
 Relay waterMainRelay(waterMainRelayName, 13);
-Relay waterGardenRelay(waterGardenRelayName, 3);
-Relay waterSideRelay(waterSideRelayName, 7);
-Relay waterEastRelay(waterEastRelayName, 6);
-Relay waterWestRelay(waterWestRelayName, 5);
-Relay waterSouthRelay(waterSouthRelayName, 4);
-Contact tempNotUsed(tempNotUsedName, 2);
+Relay waterGardenRelay(waterGardenRelayName, 5);
+Relay waterSideRelay(waterSideRelayName, 9);
+Relay waterEastRelay(waterEastRelayName, 8);
+Relay waterWestRelay(waterWestRelayName, 7);
+Relay waterSouthRelay(waterSouthRelayName, 6);
 
-uint32_t previousTime_Contact = 0;
-uint32_t previousTime_Temp = 0;
+OneWire oneWire(4);
+DallasTemperature tempSensors(&oneWire);
+
+//Speed windSpeed(2);
+//Speed rainFlow(3);
+
+uint32_t previousTime_1s = 0;
+uint32_t previousTime_10s = 0;
 uint32_t currentTime = 0;
+uint32_t currentWindSpeedValue = 0;
+uint32_t previousWindSpeedValue = 0;
+uint32_t currentRainFlowValue = 0;
+uint32_t previousRainFlowValue = 0;
 
 void ping_cmdGet(int arg_cnt, char **args) { cnc_print_cmdGet_u32(pingName, currentTime); }
 void waterMainRelay_cmdGet(int arg_cnt, char **args) { waterMainRelay.cmdGet(arg_cnt, args); }
@@ -42,6 +55,7 @@ void waterWestRelay_cmdGet(int arg_cnt, char **args) { waterWestRelay.cmdGet(arg
 void waterWestRelay_cmdSet(int arg_cnt, char **args) { waterWestRelay.cmdSet(arg_cnt, args); }
 void waterSouthRelay_cmdGet(int arg_cnt, char **args) { waterSouthRelay.cmdGet(arg_cnt, args); }
 void waterSouthRelay_cmdSet(int arg_cnt, char **args) { waterSouthRelay.cmdSet(arg_cnt, args); }
+uint8_t tempSensorsNb = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -63,19 +77,41 @@ void setup() {
   cnc_cmdSet_Add(waterWestRelayName, waterWestRelay_cmdSet);
   cnc_cmdGet_Add(waterSouthRelayName, waterSouthRelay_cmdGet);
   cnc_cmdSet_Add(waterSouthRelayName, waterSouthRelay_cmdSet);
-  previousTime_Contact = millis();
-  previousTime_Temp = millis();
+  previousTime_1s = millis();
+  previousTime_10s = previousTime_1s;
 }
 
 
 void loop() {
-  delay(1);
-  waterMainRelay.run(false); cncPoll();
-  waterGardenRelay.run(false); cncPoll();
-  waterSideRelay.run(false); cncPoll();
-  waterEastRelay.run(false); cncPoll();
-  waterWestRelay.run(false); cncPoll();
-  waterSouthRelay.run(false); cncPoll();
   currentTime = millis(); cncPoll();
-  cncPoll();
+  /* HK @ 1.0Hz */
+  if((uint32_t)(currentTime - previousTime_1s) >= 1000) {
+    waterMainRelay.run(true); cncPoll();
+    waterGardenRelay.run(true); cncPoll();
+    waterSideRelay.run(true); cncPoll();
+    waterEastRelay.run(true); cncPoll();
+    waterWestRelay.run(true); cncPoll();
+    waterSouthRelay.run(true); cncPoll();
+    previousTime_1s = currentTime;
+  }
+  /* HK @ 0.1Hz */
+  if((uint32_t)(currentTime - previousTime_10s) >= 10000) {
+    //currentWindSpeedValue = windSpeed.get();
+    cnc_print_hk_u32(windSpeedName, currentWindSpeedValue - previousWindSpeedValue);
+    previousWindSpeedValue = currentWindSpeedValue;
+    //currentRainFlowValue = rainFlow.get();
+    cnc_print_hk_u32(rainFlowName, currentRainFlowValue - previousRainFlowValue);
+    previousRainFlowValue = currentRainFlowValue;
+    /*
+    tempSensors.begin();
+    tempSensorsNb = tempSensors.getDeviceCount();
+    tempSensors.requestTemperatures();
+    for(uint8_t i=0; i<tempSensorsNb; i++)  {
+      DeviceAddress sensorAddr;
+      tempSensors.getAddress(sensorAddr, i);
+      cnc_print_hk_temp_sensor(tempSensorsName, sensorAddr, tempSensors.getTempCByIndex(i));
+    }
+    */
+    previousTime_10s = currentTime;
+  }
 }
