@@ -31,9 +31,6 @@ Relay waterSouthRelay(waterSouthRelayName, 6);
 OneWire oneWire(4);
 DallasTemperature tempSensors(&oneWire);
 
-//Speed windSpeed(2);
-//Speed rainFlow(3);
-
 uint32_t previousTime_1s = 0;
 uint32_t previousTime_10s = 0;
 uint32_t currentTime = 0;
@@ -57,6 +54,14 @@ void waterSouthRelay_cmdGet(int arg_cnt, char **args) { waterSouthRelay.cmdGet(a
 void waterSouthRelay_cmdSet(int arg_cnt, char **args) { waterSouthRelay.cmdSet(arg_cnt, args); }
 uint8_t tempSensorsNb = 0;
 
+void ISR_windSpeed(void) {
+  currentWindSpeedValue++;
+}
+
+void ISR_rainFlow(void) {
+  currentRainFlowValue++;
+}
+
 void setup() {
   Serial.begin(115200);
   cncInit(nodeName);
@@ -79,6 +84,10 @@ void setup() {
   cnc_cmdSet_Add(waterSouthRelayName, waterSouthRelay_cmdSet);
   previousTime_1s = millis();
   previousTime_10s = previousTime_1s;
+  pinMode(2, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(2), ISR_windSpeed, CHANGE);
+  pinMode(3, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(3), ISR_rainFlow, CHANGE);
 }
 
 
@@ -96,13 +105,10 @@ void loop() {
   }
   /* HK @ 0.1Hz */
   if((uint32_t)(currentTime - previousTime_10s) >= 10000) {
-    //currentWindSpeedValue = windSpeed.get();
     cnc_print_hk_u32(windSpeedName, currentWindSpeedValue - previousWindSpeedValue);
     previousWindSpeedValue = currentWindSpeedValue;
-    //currentRainFlowValue = rainFlow.get();
     cnc_print_hk_u32(rainFlowName, currentRainFlowValue - previousRainFlowValue);
     previousRainFlowValue = currentRainFlowValue;
-    /*
     tempSensors.begin();
     tempSensorsNb = tempSensors.getDeviceCount();
     tempSensors.requestTemperatures();
@@ -111,7 +117,6 @@ void loop() {
       tempSensors.getAddress(sensorAddr, i);
       cnc_print_hk_temp_sensor(tempSensorsName, sensorAddr, tempSensors.getTempCByIndex(i));
     }
-    */
     previousTime_10s = currentTime;
   }
 }
