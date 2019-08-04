@@ -85,9 +85,9 @@ void setup() {
   previousTime_1s = millis();
   previousTime_10s = previousTime_1s;
   pinMode(2, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(2), ISR_windSpeed, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(2), ISR_rainFlow, CHANGE);
   pinMode(3, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(3), ISR_rainFlow, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(3), ISR_windSpeed, CHANGE);
 }
 
 
