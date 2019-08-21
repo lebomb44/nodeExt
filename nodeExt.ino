@@ -37,7 +37,6 @@ uint32_t currentTime = 0;
 uint32_t currentWindSpeedValue = 0;
 uint32_t previousWindSpeedValue = 0;
 uint32_t currentRainFlowValue = 0;
-uint32_t previousRainFlowValue = 0;
 
 void ping_cmdGet(int arg_cnt, char **args) { cnc_print_cmdGet_u32(pingName, currentTime); }
 void waterMainRelay_cmdGet(int arg_cnt, char **args) { waterMainRelay.cmdGet(arg_cnt, args); }
@@ -107,8 +106,7 @@ void loop() {
   if((uint32_t)(currentTime - previousTime_10s) >= 10000) {
     cnc_print_hk_u32(windSpeedName, currentWindSpeedValue - previousWindSpeedValue);
     previousWindSpeedValue = currentWindSpeedValue;
-    cnc_print_hk_u32(rainFlowName, currentRainFlowValue - previousRainFlowValue);
-    previousRainFlowValue = currentRainFlowValue;
+    cnc_print_hk_u32(rainFlowName, currentRainFlowValue);
     tempSensors.begin();
     tempSensorsNb = tempSensors.getDeviceCount();
     tempSensors.requestTemperatures();
