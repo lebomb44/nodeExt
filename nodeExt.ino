@@ -24,8 +24,8 @@ const char rainFlowName[] PROGMEM = "rainFlow";
 Relay waterMainRelay(waterMainRelayName, 13);
 Relay waterGardenRelay(waterGardenRelayName, 5);
 Relay waterSideRelay(waterSideRelayName, 9);
-Relay waterEastRelay(waterEastRelayName, 8);
-Relay waterWestRelay(waterWestRelayName, 7);
+Relay waterEastRelay(waterEastRelayName, 7);
+Relay waterWestRelay(waterWestRelayName, 8);
 Relay waterSouthRelay(waterSouthRelayName, 6);
 
 OneWire oneWire(4);
