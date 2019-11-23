@@ -1,0 +1,2 @@
+Anemometre: Velleman WS1080/WS
+Pluviometre: Velleman WS1080/RM
