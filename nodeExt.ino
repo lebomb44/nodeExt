@@ -36,6 +36,7 @@ uint32_t previousTime_10s = 0;
 uint32_t currentTime = 0;
 uint32_t currentWindSpeedValue = 0;
 uint32_t previousWindSpeedValue = 0;
+uint32_t diffWindSpeedValue = 0;
 uint32_t currentRainFlowValue = 0;
 
 void ping_cmdGet(int arg_cnt, char **args) { cnc_print_cmdGet_u32(pingName, currentTime); }
@@ -51,6 +52,9 @@ void waterWestRelay_cmdGet(int arg_cnt, char **args) { waterWestRelay.cmdGet(arg
 void waterWestRelay_cmdSet(int arg_cnt, char **args) { waterWestRelay.cmdSet(arg_cnt, args); }
 void waterSouthRelay_cmdGet(int arg_cnt, char **args) { waterSouthRelay.cmdGet(arg_cnt, args); }
 void waterSouthRelay_cmdSet(int arg_cnt, char **args) { waterSouthRelay.cmdSet(arg_cnt, args); }
+void windSpeed_cmdGet(int arg_cnt, char **args) { cnc_print_cmdGet_u32(windSpeedName, diffWindSpeedValue); }
+void rainFlow_cmdGet(int arg_cnt, char **args) { cnc_print_cmdGet_u32(rainFlowName, currentRainFlowValue); }
+void rainFlow_cmdSet(int arg_cnt, char **args) { if(4 == arg_cnt) { currentRainFlowValue = strtoul(args[3], NULL, 10); } }
 uint8_t tempSensorsNb = 0;
 
 void ISR_windSpeed(void) {
@@ -78,9 +82,11 @@ void setup() {
   cnc_cmdGet_Add(waterEastRelayName, waterEastRelay_cmdGet);
   cnc_cmdSet_Add(waterEastRelayName, waterEastRelay_cmdSet);
   cnc_cmdGet_Add(waterWestRelayName, waterWestRelay_cmdGet);
-  cnc_cmdSet_Add(waterWestRelayName, waterWestRelay_cmdSet);
   cnc_cmdGet_Add(waterSouthRelayName, waterSouthRelay_cmdGet);
   cnc_cmdSet_Add(waterSouthRelayName, waterSouthRelay_cmdSet);
+  cnc_cmdGet_Add(windSpeedName, windSpeed_cmdGet);
+  cnc_cmdGet_Add(rainFlowName, rainFlow_cmdGet);
+  cnc_cmdSet_Add(rainFlowName, rainFlow_cmdSet);
   previousTime_1s = millis();
   previousTime_10s = previousTime_1s;
   pinMode(2, INPUT_PULLUP);
@@ -104,7 +110,8 @@ void loop() {
   }
   /* HK @ 0.1Hz */
   if((uint32_t)(currentTime - previousTime_10s) >= 10000) {
-    cnc_print_hk_u32(windSpeedName, currentWindSpeedValue - previousWindSpeedValue);
+    diffWindSpeedValue = currentWindSpeedValue - previousWindSpeedValue;
+    cnc_print_hk_u32(windSpeedName, diffWindSpeedValue);
     previousWindSpeedValue = currentWindSpeedValue;
     cnc_print_hk_u32(rainFlowName, currentRainFlowValue);
     tempSensors.begin();
