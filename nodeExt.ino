@@ -113,7 +113,7 @@ void loop() {
     diffWindSpeedValue = currentWindSpeedValue - previousWindSpeedValue;
     cnc_print_hk_u32(windSpeedName, diffWindSpeedValue);
     previousWindSpeedValue = currentWindSpeedValue;
-    cnc_print_hk_u32(rainFlowName, currentRainFlowValue);
+    cnc_print_hk_u32(rainFlowName, (currentRainFlowValue*2UL)/17UL);
     tempSensors.begin();
     tempSensorsNb = tempSensors.getDeviceCount();
     tempSensors.requestTemperatures();
