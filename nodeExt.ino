@@ -110,7 +110,7 @@ void loop() {
   }
   /* HK @ 0.1Hz */
   if((uint32_t)(currentTime - previousTime_10s) >= 10000) {
-    diffWindSpeedValue = currentWindSpeedValue - previousWindSpeedValue;
+    diffWindSpeedValue = (currentWindSpeedValue - previousWindSpeedValue)/4;
     cnc_print_hk_u32(windSpeedName, diffWindSpeedValue);
     previousWindSpeedValue = currentWindSpeedValue;
     cnc_print_hk_u32(rainFlowName, (currentRainFlowValue*2UL)/17UL);
